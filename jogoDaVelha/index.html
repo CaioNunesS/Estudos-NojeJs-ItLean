@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" href="./css/style.css">
+   <title>Jogo da Velha</title>
+</head>
+
+<body>
+   <main>
+      <h1>Jogo da Velha</h1>
+      <hr />
+      <div class="score">
+         <div class="counters">
+            <span>Player X</span>
+            <span id="counter1">0</span>
+         </div>
+   
+         <div class="counters">
+            <span>Player O</span>
+            <span id="counter2">0</span>
+         </div>
+      </div>
+
+      <div id="game">
+         <button id="1" data-i="1"></button>
+         <button id="2" data-i="2"></button>
+         <button id="3" data-i="3"></button>
+         <button id="4" data-i="4"></button>
+         <button id="5" data-i="5"></button>
+         <button id="6" data-i="6"></button>
+         <button id="7" data-i="7"></button>
+         <button id="8" data-i="8"></button>
+         <button id="9" data-i="9"></button>
+      </div>
+
+      <div class="div-btn">
+         <button type="button" class="btns" id="btn-reset" onclick="reset()"> Jogar Novamente </button>
+         <button type="button" class="btns" id="btn-reload" onclick="reload()"> Reiniciar Jogo </button>
+      </div>
+
+      <h2 class="currentPlayer"></h2>
+   </main>
+   <script src="./js/script.js"></script>
+</body>
+
+</html>

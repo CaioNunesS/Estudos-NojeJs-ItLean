@@ -1,0 +1,4 @@
+::1 - - [09/May/2023:18:54:55 +0000] "GET /api/quotes HTTP/1.1" 200 1259 "-" "PostmanRuntime/7.32.2" -
+::1 - - [09/May/2023:18:55:38 +0000] "GET /api/logs HTTP/1.1" 200 103 "http://localhost:9000/index.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36" -
+::1 - - [09/May/2023:18:55:39 +0000] "GET /favicon.ico HTTP/1.1" 404 150 "http://localhost:9000/index.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36" -
+::1 - - [09/May/2023:18:57:14 +0000] "GET /api/logs HTTP/1.1" 200 548 "http://localhost:9000/index.html" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36" -

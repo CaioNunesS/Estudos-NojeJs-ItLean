@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta http-equiv="X-UA-Compatible" content="ie=edge">
+   <title>Logs</title>
+   <!-- CSS do Bootstrap -->
+   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+   <!-- CSS do Creative Tim -->
+   <link rel="stylesheet"
+      href="https://demos.creative-tim.com/argon-dashboard/assets/css/argon-dashboard.min.css?v=1.2.0">
+   <!-- Font Awesome -->
+   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
+   <!-- DataTables -->
+   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap4.min.css" />
+   <!-- CSS personalizado -->
+   <style>
+      .table-danger>* {
+         background-color: #f8d7da !important;
+      }
+
+      .table td {
+         max-width: 200px;
+         word-wrap: break-word;
+         white-space: normal !important;
+      }
+   </style>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/styles/default.min.css">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.7.2/highlight.min.js"></script>
+</head>
+
+<body>
+
+   <!-- Modal -->
+   <div class="modal fade" id="jsonModal" tabindex="-1" role="dialog" aria-labelledby="jsonModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+         <div class="modal-content">
+            <div class="modal-header">
+               <h5 class="modal-title" id="jsonModalLabel">JSON da requisição</h5>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                  <span aria-hidden="true">&times;</span>
+               </button>
+            </div>
+            <div class="modal-body">
+               <pre><code id="jsonContent"></code></pre>
+            </div>
+         </div>
+      </div>
+   </div>
+
+
+   <!-- Conteúdo da página -->
+   <div class="container">
+      <div class="row">
+         <div class="col-lg-12">
+            <div class="card">
+               <div class="card-body">
+                  <h1 class="card-title">Logs</h1>
+                  <table id="logsTable" class="table table-striped">
+                     <thead>
+                        <tr>
+                           <th>IP</th>
+                           <th>Data e hora</th>
+                           <th>Requisição</th>
+                           <th>Status</th>
+                           <th>Tamanho</th>
+                           <th>Referência</th>
+                           <th>Agente de usuário</th>
+                           <th>Corpo da requisição</th>
+                        </tr>
+                     </thead>
+                     <tbody>
+                     </tbody>
+                  </table>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+   <!-- Scripts do Bootstrap -->
+   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+   <!-- DataTables -->
+   <script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+   <script type="text/javascript" src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+   <!-- JS personalizado -->
+   <script>
+      async function fetchLogs() {
+         const logsTableBody = document.querySelector('table tbody');
+
+         try {
+            const response = await fetch('/api/logs');
+            const logs = await response.text();
+            const logLines = logs.split('\n');
+
+            for (const logLine of logLines) {
+               if (logLine.trim() === '') continue;
+               const [, ip, timestamp, method, path, protocol, status, size, referer, userAgent, reqBody] = logLine.match(/^(\S+) - - \[(.+)\] "(\S+) (.+?) (\S+)" (\d+) (\S+) "([^"]*)" "([^"]*)" (.+)/);
+
+               const row = document.createElement('tr');
+
+               if (parseInt(status, 10) >= 400) {
+                  row.classList.add('table-danger');
+               }
+
+               row.innerHTML = `
+    <td>${ip}</td>
+    <td>${timestamp}</td>
+    <td>${method} ${path} ${protocol}</td>
+    <td>${status}</td>
+    <td>${size}</td>
+    <td>${referer}</td>
+    <td>${userAgent}</td>
+  `;
+
+               if (reqBody !== '-') {
+                  const buttonCell = document.createElement('td');
+                  const viewJsonButton = document.createElement('button');
+                  viewJsonButton.type = 'button';
+                  viewJsonButton.classList.add('btn', 'btn-primary', 'view-json');
+                  viewJsonButton.setAttribute('data-toggle', 'modal');
+                  viewJsonButton.setAttribute('data-target', '#jsonModal');
+                  viewJsonButton.setAttribute('data-json', reqBody);
+                  viewJsonButton.textContent = 'Ver JSON';
+                  buttonCell.appendChild(viewJsonButton);
+                  row.appendChild(buttonCell);
+               } else {
+                  row.innerHTML += '<td></td>';
+               }
+
+               logsTableBody.appendChild(row);
+            }
+
+            const jsonButtons = document.querySelectorAll('.view-json');
+            jsonButtons.forEach((button) => {
+               button.addEventListener('click', showJsonModal);
+            });
+
+            $('#logsTable').DataTable({
+               "paging": true,
+               "lengthChange": true,
+               "searching": true,
+               "ordering": true,
+               "info": true,
+               "autoWidth": true,
+               "responsive": true,
+               "lengthMenu": [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]]
+            });
+
+         } catch (error) {
+            const row = document.createElement('tr');
+            row.innerHTML = '<td colspan="8" class="text-center">Não foi possível carregar os logs.</td>';
+            logsTableBody.appendChild(row);
+         }
+      }
+
+      function showJsonModal(event) {
+         const jsonContent = document.querySelector('#jsonModal #jsonContent');
+         const json = event.target.getAttribute('data-json'); try {
+            const parsedJson = JSON.parse(json);
+            const formattedJson = JSON.stringify(parsedJson, null, 2);
+            jsonContent.innerHTML = `<code class="json hljs">${formattedJson}</code>`;
+         } catch (error) {
+            jsonContent.textContent = json;
+         }
+
+         hljs.highlightBlock(jsonContent.firstChild);
+      }
+
+      fetchLogs();
+   </script>
+</body>
+
+</html>
+

@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id    String  @id @default(uuid())
+  name  String  @db.VarChar(255)
+  email String  @unique
+  photo String?
+
+  password String
+  role     RoleEnumType? @default(user)
+
+  verificationCode String? @unique @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([email, verificationCode])
+  @@index([email, verificationCode])
+  @@map(name: "users")
+}
+
+model Author {
+  id     String   @id @default(uuid())
+  name   String   @unique
+  Quotes Quotes[]
+
+  @@index([name])
+  @@map(name: "authors")
+}
+
+model Quotes {
+  id       String @id @default(uuid())
+  quote    String @unique
+  author   Author @relation(fields: [authorId], references: [id])
+  authorId String
+
+  @@index([quote])
+  @@map(name: "quotes")
+}
+
+enum RoleEnumType {
+  user
+  admin
+}
