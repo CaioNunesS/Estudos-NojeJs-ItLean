@@ -61,6 +61,7 @@ model Orders {
   User      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String?
   couponsId String?
+  isPaid    Boolean   @default(false)
 }
 
 model Coupons {

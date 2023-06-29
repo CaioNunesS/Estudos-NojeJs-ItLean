@@ -19,6 +19,7 @@ export const createOrder = async products => {
     });
     return result;
   } catch (error) {
+    console.log('error ==>', error);
     throwError('Erro create order');
   }
 };
@@ -39,6 +40,7 @@ export const findOrderById = async id => {
       select: {
         id: true,
         value: true,
+        isPaid: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -49,6 +51,34 @@ export const findOrderById = async id => {
 
     return result;
   } catch (error) {
-    throwError('Order nor found');
+    throwError('Order not found');
+  }
+};
+
+export const updateOrder = async (id, products) => {
+  try {
+    const getOrder = await findOrderById(id);
+    const value = await SumProductsPrice(products);
+
+    if (!getOrder) throwError('Order not found');
+
+    if (getOrder.isPaid == true) throwError('Order already paid');
+
+    const result = await db.orders.update({
+      data: {
+        value,
+        products: {
+          connect: products.map(product => ({ id: product })),
+        },
+      },
+      where: {
+        id,
+      },
+    });
+
+    return result;
+  } catch (error) {
+    console.log('error ==>', error);
+    throwError('Error find order');
   }
 };

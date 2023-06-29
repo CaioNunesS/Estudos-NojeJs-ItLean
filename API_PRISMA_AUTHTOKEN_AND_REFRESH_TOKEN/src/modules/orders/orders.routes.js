@@ -5,7 +5,7 @@ import {
   asyncWrapper,
   validate,
 } from '../../middleware/index.js';
-import { create } from './orders.controller.js';
+import { create, update } from './orders.controller.js';
 import { ordersSchema } from './orders.schema.js';
 
 const ordersRoutes = Router();
@@ -16,6 +16,13 @@ ordersRoutes.post(
   hasRole(['ADMIN', 'CLIENT']),
   validate(ordersSchema),
   asyncWrapper(create)
+);
+
+ordersRoutes.put(
+  '/:id',
+  isAuthenticated,
+  hasRole(['CLIENT']),
+  asyncWrapper(update)
 );
 
 export default ordersRoutes;
