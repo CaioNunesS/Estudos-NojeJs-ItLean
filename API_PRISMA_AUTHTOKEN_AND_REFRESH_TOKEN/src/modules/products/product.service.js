@@ -86,16 +86,12 @@ export const findProductById = async id => {
   }
 };
 
-export const updateProduct = async ({ id, name, price, photo }) => {
+export const updateProduct = async (id, product) => {
   try {
-    await findProductById({ id });
+    await findProductById(id);
 
     const result = await db.products.update({
-      data: {
-        name,
-        price,
-        photo,
-      },
+      data: product,
       where: {
         id,
       },
@@ -104,5 +100,19 @@ export const updateProduct = async ({ id, name, price, photo }) => {
     return result;
   } catch (error) {
     throwError('Error update product');
+  }
+};
+
+export const findProductsByImagePhoto = async imageName => {
+  try {
+    return await db.products.findMany({
+      where: {
+        photo: {
+          contains: imageName,
+        },
+      },
+    });
+  } catch (error) {
+    throwError('Error find products photo');
   }
 };

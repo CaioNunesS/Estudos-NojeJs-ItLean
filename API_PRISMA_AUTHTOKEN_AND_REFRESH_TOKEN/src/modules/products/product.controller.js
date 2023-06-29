@@ -42,16 +42,16 @@ export const exclude = async (req, res) => {
 
 export const update = async (req, res) => {
   const { id } = req.params;
-  const { name, price, photo } = req.body;
+  const product = req.body;
 
-  const result = await updateProduct({ id, name, price, photo });
+  const result = await updateProduct(id, product);
 
   return res.status(201).json({ data: result, message: 'Product updated' });
 };
 
 export const findById = async (req, res) => {
   const { id } = req.params;
-  const result = await findProductById({ id });
+  const result = await findProductById(id);
 
   return res.json({ data: result });
 };

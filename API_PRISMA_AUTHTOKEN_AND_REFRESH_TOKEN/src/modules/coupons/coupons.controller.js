@@ -32,6 +32,6 @@ export const create = async (req, res) => {
 export const findById = async (req, res) => {
   const { id } = req.params;
 
-  const result = await findCouponById({ id });
+  const result = await findCouponById(id);
   return res.json({ data: result });
 };

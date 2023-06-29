@@ -53,7 +53,7 @@ export const findAllCoupons = async ({ offset, listPerPage, query, order }) => {
   }
 };
 
-export const findCouponById = async ({ id }) => {
+export const findCouponById = async id => {
   try {
     const result = await db.coupons.findUnique({
       where: {

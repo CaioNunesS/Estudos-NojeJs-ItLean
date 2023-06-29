@@ -2,7 +2,12 @@ import { db } from '../../config/db.js';
 import { throwError } from '../../utils/index.js';
 
 import { resolve } from 'path';
-import { existsSync, unlink } from 'fs';
+import { existsSync, unlinkSync } from 'fs';
+
+import {
+  findProductsByImagePhoto,
+  updateProduct,
+} from '../products/product.service.js';
 
 export const uploadProductImage = async ({ photo, productId }) => {
   try {
@@ -27,17 +32,16 @@ export const deleteProductImage = async imageName => {
 
     if (!existsSync(imagePath)) throwError('Image not found.');
 
-    return unlink(imagePath);
+    const photoProducts = await findProductsByImagePhoto(imageName);
 
-    // await db.products.upsert({
-    //   data: {
-    //     photo: null,
-    //   },
-    //   where: {
-    //     id,
-    //   },
-    // });
+    for (const product of photoProducts) {
+      await updateProduct(product.id, {
+        photo: null,
+      });
+    }
+    return unlinkSync(imagePath);
   } catch (error) {
+    console.log('error ==>', error);
     throwError('Error delete image');
   }
 };
