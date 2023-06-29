@@ -3,55 +3,56 @@ import {
   authenticatedUserByEmailAndPassword,
   refreshToken as refreshTokenService,
   revokeTokens,
+  oAuthGithub,
 } from './auth.service.js';
 
 export const create = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password, name } = req.body;
 
-    const result = await register({ email, password });
+  const result = await register({ email, password, name });
 
-    return res.status(201).json(result);
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
-  }
+  return res.status(201).json(result);
 };
 
 export const login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    const result = await authenticatedUserByEmailAndPassword({
-      email,
-      password,
-    });
+  const result = await authenticatedUserByEmailAndPassword({
+    email,
+    password,
+  });
 
-    return res.json(result);
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
-  }
+  return res.json(result);
 };
 
 export const refreshtoken = async (req, res) => {
-  try {
-    const { refreshToken } = req.body;
+  const { refreshToken } = req.body;
 
-    const result = await refreshTokenService({ refreshToken });
+  const result = await refreshTokenService({ refreshToken });
 
-    return res.json(result);
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
-  }
+  return res.json(result);
 };
 
 export const revokeRefrehTokens = async (req, res) => {
-  try {
-    const { userId } = req.body;
+  const { userId } = req.body;
 
-    await revokeTokens(userId);
+  await revokeTokens(userId);
 
-    return res.json({ message: `Tokens revoked for user with id #${userId}` });
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
-  }
+  return res.json({ message: `Tokens revoked for user with id #${userId}` });
+};
+
+export const loginGithub = async (req, res) => {
+  const { code: requestToken } = req.query;
+
+  const result = await oAuthGithub({ requestToken });
+
+  return res.json(result);
+};
+
+export const completeRegister = async (req, res) => {
+  const { email, password, name, gitHubId } = req.body;
+
+  const result = await register({ email, password, name, gitHubId });
+
+  return res.status(201).json(result);
 };

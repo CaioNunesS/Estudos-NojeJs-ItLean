@@ -1,5 +1,6 @@
 import { hashSync, compare } from 'bcrypt';
-import { db } from '../../config/db.js';
+import { db } from '../../config/index.js';
+import { throwError } from '../../utils/customError.js';
 
 export const findUserByEmail = email => {
   try {
@@ -9,7 +10,7 @@ export const findUserByEmail = email => {
       },
     });
   } catch (error) {
-    throw new Error('User not found');
+    throwError('User not found', 404);
   }
 };
 
@@ -20,7 +21,7 @@ export const createUser = user => {
       data: user,
     });
   } catch (error) {
-    throw new Error('User not found');
+    throwError('Erro create user');
   }
 };
 
@@ -31,6 +32,7 @@ export const findUserById = id => {
         id: true,
         email: true,
         role: true,
+        name: true,
         password: false,
         verificationCode: false,
       },
@@ -39,23 +41,7 @@ export const findUserById = id => {
       },
     });
   } catch (error) {
-    throw new Error('User not found');
-  }
-};
-
-export const comparePassword = async ({ email, password }) => {
-  try {
-    const existingUser = await findUserByEmail(email);
-
-    if (!existingUser) throw new Error('User not found');
-
-    const validPassword = await compare(password, existingUser.password);
-
-    if (!validPassword) throw new Error('Invalid Login Credential');
-
-    return existingUser;
-  } catch (error) {
-    throw new Error('User not found');
+    throwError('User not found', 404);
   }
 };
 
@@ -73,11 +59,51 @@ export const findAllUser = async ({ offset, listPerPage, query, order }) => {
       select: {
         id: true,
         email: true,
+        name: true,
       },
       skip: offset,
       take: listPerPage,
     });
   } catch (error) {
-    throw new Error('Users not found');
+    throwError('Erro find users');
+  }
+};
+
+export const comparePassword = async ({ email, password }) => {
+  try {
+    const existingUser = await findUserByEmail(email);
+
+    if (!existingUser) {
+      throwError('User not found', 404);
+    }
+
+    const validPassword = await compare(password, existingUser.password);
+
+    if (!validPassword) {
+      throwError('Invalid login credentials');
+    }
+
+    return existingUser;
+  } catch (error) {
+    throwError('Erro find user');
+  }
+};
+
+export const findUserByGithubId = gitHubId => {
+  try {
+    return db.user.findUnique({
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        name: true,
+        gitHubId: true,
+      },
+      where: {
+        gitHubId,
+      },
+    });
+  } catch (error) {
+    throwError('User not found', 404);
   }
 };

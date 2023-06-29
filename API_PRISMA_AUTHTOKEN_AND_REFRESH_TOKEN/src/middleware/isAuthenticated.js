@@ -1,10 +1,12 @@
 import jwt from 'jsonwebtoken';
+import { throwError } from '../utils/customError.js';
 
 export const isAuthenticated = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization) {
     res.status(401);
+    throwError('Un=Authorized', 401);
     throw new Error('Un=Authorized');
   }
   try {

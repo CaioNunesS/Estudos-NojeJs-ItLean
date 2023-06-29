@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import helmet from 'helmet'; //
 import cors from 'cors';
 
-import { errorHandler, notFound } from './middleware/index.js';
+import { errorHandler, notFound, logMiddleware } from './middleware/index.js';
 
 import routes from './routes.js';
 
@@ -15,6 +15,7 @@ app.use(helmet());
 app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: true }));
+app.use(logMiddleware);
 
 app.use('/api/v1', routes);
 

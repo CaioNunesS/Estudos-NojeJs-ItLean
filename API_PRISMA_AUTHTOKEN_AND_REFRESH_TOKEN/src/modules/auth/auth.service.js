@@ -1,12 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import jwt from 'jsonwebtoken';
+
+import { getGithubUser, githubCallback } from './oAuth/index.js';
 import { db } from '../../config/index.js';
-import { hashToken, generateTokens } from '../../utils/index.js';
+import { hashToken, generateTokens, throwError } from '../../utils/index.js';
 import {
   findUserByEmail,
   createUser,
   comparePassword,
   findUserById,
+  findUserByGithubId,
 } from '../users/users.service.js';
 
 export const addRefreshTokenToWhiteList = ({ jwtId, refreshToken, userId }) => {
@@ -19,7 +22,7 @@ export const addRefreshTokenToWhiteList = ({ jwtId, refreshToken, userId }) => {
       },
     });
   } catch (error) {
-    throw new Error(error);
+    throwError('Erro add refreshToken');
   }
 };
 
@@ -31,7 +34,7 @@ export const findRefreshTokenById = id => {
       },
     });
   } catch (error) {
-    throw new Error(error);
+    throwError('RefreshToken not found');
   }
 };
 
@@ -46,7 +49,7 @@ export const deleteRefreshToken = id => {
       },
     });
   } catch (error) {
-    throw new Error(error);
+    throwError('RefreshToken not found');
   }
 };
 
@@ -61,21 +64,21 @@ export const revokeTokens = userId => {
   });
 };
 
-export const register = async ({ email, password }) => {
+export const register = async ({ email, password, name, gitHubId }) => {
   try {
     const existingUser = await findUserByEmail(email);
 
     if (existingUser) {
-      throw new Error('Email already is use');
+      throwError('Email already is use');
     }
 
-    const user = await createUser({ email, password });
+    const user = await createUser({ email, password, name, gitHubId });
 
     const result = await returnResponse({ user });
 
     return result;
   } catch (error) {
-    throw new Error(error);
+    throwError('Erro register user');
   }
 };
 
@@ -90,7 +93,7 @@ export const authenticatedUserByEmailAndPassword = async ({
 
     return result;
   } catch (error) {
-    throw new Error(error);
+    throwError('Erro authenticate user');
   }
 };
 
@@ -102,16 +105,16 @@ export const refreshToken = async ({ refreshToken }) => {
     const savedRefreshToken = await findRefreshTokenById(payload.jwtId);
 
     if (!savedRefreshToken || savedRefreshToken.revoked === true)
-      throw new Error('Unauthorized');
+      throwError('Unauthorized');
 
     const hashedtoken = hashToken(refreshToken);
 
     if (hashedtoken !== savedRefreshToken.hashedToken)
-      throw new Error('Unauthorized');
+      throwError('Unauthorized');
 
     const user = await findUserById(payload.userId);
 
-    if (!user) throw new Error('Unauthorized');
+    if (!user) throwError('Unauthorized');
 
     await deleteRefreshToken(savedRefreshToken.id);
 
@@ -119,7 +122,27 @@ export const refreshToken = async ({ refreshToken }) => {
 
     return result;
   } catch (error) {
-    throw new Error(error);
+    throwError('Erro authenticate');
+  }
+};
+
+export const oAuthGithub = async ({ requestToken }) => {
+  try {
+    const { access_token } = await githubCallback({ requestToken });
+    const responseGithub = await getGithubUser({ access_token });
+    const getUserDB = await findUserByGithubId(responseGithub.id.toString());
+
+    if (!getUserDB)
+      return {
+        userId: responseGithub.id.toString(),
+        message: 'User not found',
+      };
+
+    const result = await returnResponse({ user: getUserDB });
+
+    return result;
+  } catch (error) {
+    throwError('Erro authenticate');
   }
 };
 
