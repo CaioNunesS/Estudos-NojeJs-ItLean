@@ -1,11 +1,11 @@
 import { db } from '../../config/index.js';
-import { throwError } from '../../utils/customError.js';
+import { throwError } from '../../utils/index.js';
 
 export const createProduct = async ({ name, price, photo }) => {
   try {
     const getProduct = await findProductByName(name);
 
-    if (getProduct) throwError('Product alredy exists', 409);
+    if (getProduct) throwError('Product already exists', 409);
 
     const result = await db.products.create({
       data: {
@@ -16,7 +16,7 @@ export const createProduct = async ({ name, price, photo }) => {
     });
     return result;
   } catch (error) {
-    throwError(error.message, error.statusCode);
+    throwError('Error create product');
   }
 };
 

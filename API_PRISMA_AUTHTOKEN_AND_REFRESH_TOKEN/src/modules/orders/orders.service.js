@@ -30,7 +30,6 @@ const SumProductsPrice = async products => {
     const product = await findProductById(productId);
     productPrice += Number.parseFloat(product.price);
   }
-
   return productPrice.toFixed(2);
 };
 
@@ -78,7 +77,6 @@ export const updateOrder = async (id, products) => {
 
     return result;
   } catch (error) {
-    console.log('error ==>', error);
     throwError('Error find order');
   }
 };
