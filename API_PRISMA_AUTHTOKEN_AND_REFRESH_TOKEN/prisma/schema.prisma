@@ -18,11 +18,12 @@ enum Role {
 
 model User {
   id               String         @id @unique @default(uuid())
-  name             String?
-  gitHubId         String?        @unique @db.Text
+  name             String
   email            String         @unique
   password         String
-  verificationCode String?        @unique @db.Text //os dados são notNullAble por default
+  githubId         String?        @unique @db.Text
+  googleId         String?        @unique @db.Text
+  verificationCode String?        @unique @db.Text
   refreshTokens    RefreshToken[]
   orders           Orders[]
   role             Role           @default(CLIENT)
@@ -42,28 +43,27 @@ model RefreshToken {
 }
 
 model Products {
-  id        String   @id @unique @default(uuid())
+  id        String             @id @unique @default(uuid())
   name      String
   photo     String?
   price     String
-  Orders    Orders?  @relation(fields: [ordersId], references: [id], onDelete: Cascade)
-  ordersId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  orders    ProductsOnOrders[]
 }
 
 model Orders {
-  id        String     @id @unique @default(uuid())
+  id        String             @id @unique @default(uuid())
   value     String
-  coupons   Coupons?   @relation(fields: [couponsId], references: [id])
-  products  Products[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  User      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  User      User?              @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String?
+  coupons   Coupons?           @relation(fields: [couponsId], references: [id])
   couponsId String?
-  isPaid    Boolean    @default(false)
+  isPaid    Boolean            @default(false)
   discount  String?
+  products  ProductsOnOrders[]
 }
 
 model Coupons {
@@ -79,9 +79,22 @@ model Coupons {
 }
 
 model UserCoupons {
-  id        String  @id @unique @default(uuid())
+  id        String   @id @unique @default(uuid())
   userId    String
-  User      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User      User     @relation(fields: [userId], references: [id])
   couponsId String
-  Coupons   Coupons @relation(fields: [couponsId], references: [id], onDelete: Cascade)
+  Coupons   Coupons  @relation(fields: [couponsId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductsOnOrders {
+  Products   Products @relation(fields: [productsId], references: [id])
+  productsId String
+  Orders     Orders   @relation(fields: [ordersId], references: [id])
+  ordersId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@id([productsId, ordersId])
 }

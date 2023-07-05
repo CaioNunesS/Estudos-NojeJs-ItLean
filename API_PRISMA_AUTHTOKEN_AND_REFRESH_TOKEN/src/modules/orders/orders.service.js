@@ -8,31 +8,51 @@ import {
 } from '../coupons/coupons.service.js';
 
 export const createOrder = async ({ products, couponId, userId }) => {
-  await verifyUserCoupon(userId, couponId);
   try {
     const {
-      id,
+      // id,
       value: valueDiscount,
       revoked,
     } = await findCouponById(couponId);
     if (revoked == true) throwError('Coupon invalid');
     const value = await sumProductsPrice({ products, valueDiscount });
+
     const result = await db.orders.create({
       data: {
-        value: value,
+        value,
         products: {
-          connect: products.map(product => ({ id: product })),
+          create: products.map(product => ({
+            Products: {
+              connect: {
+                id: product,
+              },
+            },
+          })),
         },
-        couponsId: id,
+        coupons: couponId
+          ? {
+              connect: { id: couponId },
+            }
+          : undefined,
+        User: {
+          connect: { id: userId },
+        },
         discount: valueDiscount ?? '0',
-        userId,
       },
       include: {
         products: true,
+        coupons: couponId ? true : false,
+        User: {
+          select: {
+            name: true,
+          },
+        },
       },
     });
+    await verifyUserCoupon(userId, couponId);
     return result;
   } catch (error) {
+    console.log('error ==>', error);
     throwError('Erro create order');
   }
 };

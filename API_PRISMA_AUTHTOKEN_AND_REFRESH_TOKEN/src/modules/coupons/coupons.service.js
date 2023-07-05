@@ -83,25 +83,27 @@ export const revokeCoupon = async id => {
 };
 
 export const verifyUserCoupon = async (userId, couponId) => {
-  const userUseCoupon = await db.userCoupons.findMany({
-    where: {
-      OR: [
-        {
-          userId: userId,
-          couponsId: couponId,
-        },
-        {
-          userId: couponId,
-          couponsId: userId,
-        },
-      ],
-    },
-  });
-  if (userUseCoupon.length > 0) {
-    throwError('User used the coupon');
-  } else {
-    await db.userCoupons.create({
-      data: { userId, couponsId: couponId },
+  if (couponId != undefined) {
+    const userUseCoupon = await db.userCoupons.findMany({
+      where: {
+        OR: [
+          {
+            userId: userId,
+            couponsId: couponId,
+          },
+          {
+            userId: couponId,
+            couponsId: userId,
+          },
+        ],
+      },
     });
+    if (userUseCoupon.length > 0) {
+      throwError('User used the coupon');
+    } else {
+      await db.userCoupons.create({
+        data: { userId, couponsId: couponId },
+      });
+    }
   }
 };

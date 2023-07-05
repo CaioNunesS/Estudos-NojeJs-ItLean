@@ -9,6 +9,7 @@ async function main() {
       create: {
         email: 'admin@admin.com',
         password: hashSync('123456', 10),
+        name: 'Admin',
         role: 'ADMIN',
       },
     });
