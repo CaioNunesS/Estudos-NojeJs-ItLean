@@ -1,10 +1,10 @@
 import { createOrder, updateOrder } from './orders.service.js';
 
 export const create = async (req, res) => {
-  const { products } = req.body;
+  const { products, couponId } = req.body;
+  const { userId } = req.payload;
 
-  const result = await createOrder(products);
-
+  const result = await createOrder({ products, couponId, userId });
   return res.json({
     data: result,
     message: 'Order created successfully',

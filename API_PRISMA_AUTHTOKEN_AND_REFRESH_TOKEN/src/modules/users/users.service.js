@@ -47,7 +47,7 @@ export const findUserById = id => {
 
 export const findAllUser = async ({ offset, listPerPage, query, order }) => {
   try {
-    return db.user.findMany({
+    return await db.user.findMany({
       where: {
         email: {
           contains: query,
@@ -60,6 +60,7 @@ export const findAllUser = async ({ offset, listPerPage, query, order }) => {
         id: true,
         email: true,
         name: true,
+        role: true,
       },
       skip: offset,
       take: listPerPage,

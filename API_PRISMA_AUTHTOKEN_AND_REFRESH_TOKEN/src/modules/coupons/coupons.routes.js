@@ -15,7 +15,7 @@ couponsRoutes.post(
   '/',
   isAuthenticated,
   validate(couponSchema),
-  hasRole(['ADMIN']),
+  hasRole(['ADMIN', 'USER']),
   asyncWrapper(create)
 );
 couponsRoutes.get('/', handlePagination, asyncWrapper(findAll));
